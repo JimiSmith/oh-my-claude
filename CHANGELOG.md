@@ -14,7 +14,7 @@ Reworked to render natively via oh-my-posh's [`claude` segment](https://ohmyposh
 - OAuth credential access and the `ccusage` / `npx` dependency.
 - The `.usage_cache` and background update mechanism.
 - The bats test suite and `run-tests.sh` (the scripts they covered are gone).
-- `docs/OAUTH-CREDENTIALS-GUIDE.md`, `docs/PRO-USAGE-SETUP.md`.
+- The entire `docs/` folder — its guides and examples described the removed script/OAuth architecture; the README is now self-contained.
 
 ### Notes
 - 5h/7d usage requires a Pro/Max subscription and appears after Claude Code's first API response in a session.

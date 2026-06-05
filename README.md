@@ -1,7 +1,5 @@
 # Claude Code Custom Status Line
 
-![Example Status Line](docs/example.png)
-
 A fully customized [oh-my-posh](https://ohmyposh.dev/) status line for Claude Code featuring:
 - 🎨 Oh-my-posh powered theming with powerline separators (two-line layout)
 - 💾 Context window usage percentage
@@ -99,7 +97,6 @@ oh-my-claude/
 ├── .gitattributes                # Force LF line endings (cross-platform)
 ├── src/
 │   └── claude-native.omp.json    # The oh-my-posh theme (the whole status line)
-├── docs/                         # Documentation
 ├── README.md                     # This file
 ├── CHANGELOG.md                  # Version history
 └── VERSION                       # Current version number

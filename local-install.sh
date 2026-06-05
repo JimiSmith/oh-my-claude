@@ -140,6 +140,5 @@ echo "  echo '{\"model\":{\"display_name\":\"Test\"},\"context_window\":{\"curre
 echo ""
 echo "Documentation:"
 echo "  • README.md - Getting started guide"
-echo "  • docs/STATUS_LINE_QUICK_REFERENCE.md - Common operations"
 echo ""
 echo "================================================"
