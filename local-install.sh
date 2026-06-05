@@ -71,7 +71,7 @@ cp "$SCRIPT_DIR/src/common.sh" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/src/statusline.sh" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/src/update-usage.sh" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/src/fetch-code-usage.sh" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/src/claude-statusline.omp.json" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/src/claude-custom.omp.json" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/VERSION" "$INSTALL_DIR/"
 
 echo -e "${GREEN}✓ Copied all scripts to $INSTALL_DIR${NC}"

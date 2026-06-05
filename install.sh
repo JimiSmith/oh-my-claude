@@ -111,7 +111,7 @@ download_all_files() {
     download_file "$base_url/src/statusline.sh" "$temp_dir/statusline.sh" || failed=1
     download_file "$base_url/src/update-usage.sh" "$temp_dir/update-usage.sh" || failed=1
     download_file "$base_url/src/fetch-code-usage.sh" "$temp_dir/fetch-code-usage.sh" || failed=1
-    download_file "$base_url/src/claude-statusline.omp.json" "$temp_dir/claude-statusline.omp.json" || failed=1
+    download_file "$base_url/src/claude-custom.omp.json" "$temp_dir/claude-custom.omp.json" || failed=1
     download_file "$base_url/VERSION" "$temp_dir/VERSION" || failed=1
 
     if [ $failed -eq 1 ]; then
@@ -129,7 +129,7 @@ download_all_files() {
 
 # Verify all downloads completed successfully
 verify_downloads() {
-    local required_files=("common.sh" "statusline.sh" "update-usage.sh" "fetch-code-usage.sh" "claude-statusline.omp.json" "VERSION")
+    local required_files=("common.sh" "statusline.sh" "update-usage.sh" "fetch-code-usage.sh" "claude-custom.omp.json" "VERSION")
 
     for file in "${required_files[@]}"; do
         if [ ! -f "$temp_dir/$file" ] || [ ! -s "$temp_dir/$file" ]; then
@@ -204,7 +204,7 @@ install_files() {
     cp "$temp_dir/statusline.sh" "$INSTALL_DIR/"
     cp "$temp_dir/update-usage.sh" "$INSTALL_DIR/"
     cp "$temp_dir/fetch-code-usage.sh" "$INSTALL_DIR/"
-    cp "$temp_dir/claude-statusline.omp.json" "$INSTALL_DIR/"
+    cp "$temp_dir/claude-custom.omp.json" "$INSTALL_DIR/"
     cp "$temp_dir/VERSION" "$INSTALL_DIR/"
 
     echo -e "${GREEN}✓ Files copied${NC}"
