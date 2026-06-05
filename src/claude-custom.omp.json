@@ -28,7 +28,8 @@
           "foreground_templates": [
             "{{ if or (.Working.Changed) (.Staging.Changed) }}p:gray{{ end }}",
             "{{ if and (gt .Ahead 0) (gt .Behind 0) }}p:gray{{ end }}",
-            "{{ if gt .Ahead 0 }}p:gray{{ end }}"
+            "{{ if gt .Ahead 0 }}p:gray{{ end }}",
+            "{{ if gt .Behind 0 }}p:gray{{ end }}"
           ],
           "background": "p:gray",
           "background_templates": [
