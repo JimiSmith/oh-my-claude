@@ -116,8 +116,21 @@ if [ -n "$pro_five_hour_resets" ] && [ -n "$pro_seven_day_resets" ]; then
     reset_display="5h:${five_hour_display} 7d:${seven_day_display}"
 fi
 
+# Build separate 5h / 7d usage segments for the custom theme.
+# (five_hour_display / seven_day_display are set above when reset data is present.)
+claude_5h=""
+if [ -n "$pro_five_hour_usage" ]; then
+    claude_5h="${pro_five_hour_usage}%"
+    [ -n "$five_hour_display" ] && claude_5h="${claude_5h} · ${five_hour_display}"
+fi
+claude_7d=""
+if [ -n "$pro_seven_day_usage" ]; then
+    claude_7d="${pro_seven_day_usage}%"
+    [ -n "$seven_day_display" ] && claude_7d="${claude_7d} · ${seven_day_display}"
+fi
+
 # Path to oh-my-posh config file
-config_file="$script_dir/claude-statusline.omp.json"
+config_file="$script_dir/claude-custom.omp.json"
 
 # Use oh-my-posh to render the status line with clean environment
 env -i \
@@ -127,5 +140,7 @@ env -i \
   CLAUDE_CODE_USAGE="$code_usage_display" \
   CLAUDE_PRO_USAGE="$pro_usage_display" \
   CLAUDE_RESET="$reset_display" \
+  CLAUDE_5H="$claude_5h" \
+  CLAUDE_7D="$claude_7d" \
   PATH="$PATH" \
   oh-my-posh print primary --config "$config_file" --pwd "$cwd"
