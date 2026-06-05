@@ -9,6 +9,7 @@ set -e
 # Read version from VERSION file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERSION=$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo "unknown")
+THEME="claude-native.omp.json"
 
 echo "================================================"
 echo "   oh-my-claude Status Line Installation"
@@ -34,16 +35,14 @@ if ! command -v oh-my-posh >/dev/null 2>&1; then
     missing_deps+=("oh-my-posh")
 fi
 
+# jq is used by this installer to update settings.json
 if ! command -v jq >/dev/null 2>&1; then
     missing_deps+=("jq")
 fi
 
+# git is optional - only needed for the git segment of the status line
 if ! command -v git >/dev/null 2>&1; then
-    missing_deps+=("git")
-fi
-
-if ! command -v npx >/dev/null 2>&1; then
-    missing_deps+=("npx (Node.js)")
+    echo -e "${YELLOW}⚠ git not found - the git segment of the status line will be hidden${NC}"
 fi
 
 if [ ${#missing_deps[@]} -ne 0 ]; then
@@ -56,6 +55,9 @@ if [ ${#missing_deps[@]} -ne 0 ]; then
     exit 1
 fi
 
+# Resolve the oh-my-posh path so the status line command does not depend on PATH
+OMP_BIN=$(command -v oh-my-posh)
+
 echo -e "${GREEN}✓ All dependencies found${NC}"
 echo ""
 
@@ -65,29 +67,18 @@ mkdir -p "$INSTALL_DIR"
 echo -e "${GREEN}✓ Created $INSTALL_DIR${NC}"
 echo ""
 
-# Copy scripts and VERSION file
-echo "Copying scripts..."
-cp "$SCRIPT_DIR/src/common.sh" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/src/statusline.sh" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/src/update-usage.sh" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/src/fetch-code-usage.sh" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/src/claude-custom.omp.json" "$INSTALL_DIR/"
+# Copy theme and VERSION file
+echo "Copying theme..."
+cp "$SCRIPT_DIR/src/$THEME" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/VERSION" "$INSTALL_DIR/"
 
-echo -e "${GREEN}✓ Copied all scripts to $INSTALL_DIR${NC}"
-echo ""
-
-# Make scripts executable
-echo "Making scripts executable..."
-chmod +x "$INSTALL_DIR/statusline.sh"
-chmod +x "$INSTALL_DIR/update-usage.sh"
-chmod +x "$INSTALL_DIR/fetch-code-usage.sh"
-
-echo -e "${GREEN}✓ Scripts are now executable${NC}"
+echo -e "${GREEN}✓ Copied theme to $INSTALL_DIR${NC}"
 echo ""
 
 # Backup and update settings.json
 echo "Updating Claude Code settings..."
+
+cmd="$OMP_BIN claude --config $INSTALL_DIR/$THEME"
 
 if [ -f "$SETTINGS_FILE" ]; then
     # Backup existing settings
@@ -95,10 +86,9 @@ if [ -f "$SETTINGS_FILE" ]; then
     cp "$SETTINGS_FILE" "$backup_file"
     echo -e "${GREEN}✓ Backed up settings to $backup_file${NC}"
 
-    # Update statusLine.command path
-    # Use jq to update or add the statusLine configuration
+    # Update statusLine.command using jq
     tmp_file=$(mktemp)
-    jq --arg cmd "bash $INSTALL_DIR/statusline.sh" \
+    jq --arg cmd "$cmd" \
        '.statusLine.command = $cmd | .statusLine.type = "command" | .statusLine.padding = 0' \
        "$SETTINGS_FILE" > "$tmp_file"
 
@@ -111,7 +101,7 @@ else
 {
   "statusLine": {
     "type": "command",
-    "command": "bash $INSTALL_DIR/statusline.sh",
+    "command": "$cmd",
     "padding": 0
   }
 }
@@ -122,10 +112,11 @@ echo ""
 
 # Test installation
 echo "Testing installation..."
-if bash "$INSTALL_DIR/fetch-code-usage.sh" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ Code usage fetcher works${NC}"
+test_payload='{"model":{"display_name":"Test"},"workspace":{"current_dir":"'"$PWD"'"},"context_window":{"current_usage":{"input_tokens":1000},"context_window_size":200000}}'
+if echo "$test_payload" | "$OMP_BIN" claude --config "$INSTALL_DIR/$THEME" >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ Status line renders${NC}"
 else
-    echo -e "${YELLOW}⚠ Code usage fetcher test failed (this is OK if ccusage isn't set up yet)${NC}"
+    echo -e "${YELLOW}⚠ Status line render test failed${NC}"
 fi
 echo ""
 
@@ -135,27 +126,20 @@ echo -e "${GREEN}   Installation Complete!${NC}"
 echo "================================================"
 echo ""
 echo "Installation summary:"
-echo "  • Scripts installed to: $INSTALL_DIR"
+echo "  • Theme installed to: $INSTALL_DIR/$THEME"
 echo "  • Settings updated in: $SETTINGS_FILE"
 echo ""
-
-# OAuth credentials info
-echo ""
-echo -e "${GREEN}✓ Pro usage tracking uses OAuth credentials${NC}"
-echo -e "${GREEN}✓ Credentials automatically managed by Claude Code${NC}"
-echo -e "${GREEN}✓ No additional setup required!${NC}"
-echo ""
-echo -e "${GREEN}✓ Configuration complete${NC}"
+echo "The status line is rendered by 'oh-my-posh claude', which reads Claude"
+echo "Code's session JSON (model, context, and subscription usage) from stdin."
+echo "No tokens, API calls, or background scripts are involved."
 echo ""
 echo "You can now use Claude Code and see the status line!"
 echo ""
 echo "Test the status line with:"
-echo "  echo '{\"model\":{\"display_name\":\"Test\"},\"workspace\":{\"current_dir\":\"$PWD\"},\"output_style\":{\"name\":\"markdown\"},\"context_window\":{\"current_usage\":{\"input_tokens\":1000},\"context_window_size\":200000}}' | bash $INSTALL_DIR/statusline.sh"
+echo "  echo '{\"model\":{\"display_name\":\"Test\"},\"context_window\":{\"current_usage\":{\"input_tokens\":1000},\"context_window_size\":200000}}' | $OMP_BIN claude --config $INSTALL_DIR/$THEME"
 echo ""
-
 echo "Documentation:"
 echo "  • README.md - Getting started guide"
-echo "  • docs/PRO-USAGE-SETUP.md - Pro usage setup (optional)"
 echo "  • docs/STATUS_LINE_QUICK_REFERENCE.md - Common operations"
 echo ""
 echo "================================================"

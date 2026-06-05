@@ -11,6 +11,7 @@ GITHUB_REPO="JimiSmith/oh-my-claude"
 BRANCH="main"
 DEFAULT_INSTALL_DIR="$HOME/.claude/oh-my-claude"
 SETTINGS_FILE="$HOME/.claude/settings.json"
+THEME="claude-native.omp.json"
 
 # Color codes for output
 GREEN='\033[0;32m'
@@ -20,6 +21,7 @@ NC='\033[0m' # No Color
 
 # Variables (can be overridden by arguments)
 INSTALL_DIR="$DEFAULT_INSTALL_DIR"
+OMP_BIN="oh-my-posh"
 
 # Create temporary directory for downloads
 temp_dir="/tmp/oh-my-claude-install-$$"
@@ -106,12 +108,9 @@ download_all_files() {
 
     echo "Downloading from GitHub..."
 
-    # Download each file
-    download_file "$base_url/src/common.sh" "$temp_dir/common.sh" || failed=1
-    download_file "$base_url/src/statusline.sh" "$temp_dir/statusline.sh" || failed=1
-    download_file "$base_url/src/update-usage.sh" "$temp_dir/update-usage.sh" || failed=1
-    download_file "$base_url/src/fetch-code-usage.sh" "$temp_dir/fetch-code-usage.sh" || failed=1
-    download_file "$base_url/src/claude-custom.omp.json" "$temp_dir/claude-custom.omp.json" || failed=1
+    # The status line is rendered directly by `oh-my-posh claude`, which reads
+    # Claude Code's JSON from stdin - so only the theme and VERSION are needed.
+    download_file "$base_url/src/$THEME" "$temp_dir/$THEME" || failed=1
     download_file "$base_url/VERSION" "$temp_dir/VERSION" || failed=1
 
     if [ $failed -eq 1 ]; then
@@ -129,7 +128,7 @@ download_all_files() {
 
 # Verify all downloads completed successfully
 verify_downloads() {
-    local required_files=("common.sh" "statusline.sh" "update-usage.sh" "fetch-code-usage.sh" "claude-custom.omp.json" "VERSION")
+    local required_files=("$THEME" "VERSION")
 
     for file in "${required_files[@]}"; do
         if [ ! -f "$temp_dir/$file" ] || [ ! -s "$temp_dir/$file" ]; then
@@ -148,16 +147,14 @@ check_dependencies() {
         missing_deps+=("oh-my-posh")
     fi
 
+    # jq is used by this installer to update settings.json
     if ! command -v jq >/dev/null 2>&1; then
         missing_deps+=("jq")
     fi
 
+    # git is optional - only needed for the git segment of the status line
     if ! command -v git >/dev/null 2>&1; then
-        missing_deps+=("git")
-    fi
-
-    if ! command -v npx >/dev/null 2>&1; then
-        missing_deps+=("npx (Node.js)")
+        echo -e "${YELLOW}⚠ git not found - the git segment of the status line will be hidden${NC}"
     fi
 
     if [ ${#missing_deps[@]} -ne 0 ]; then
@@ -169,6 +166,9 @@ check_dependencies() {
         echo "Please install missing dependencies and try again."
         exit 1
     fi
+
+    # Resolve the oh-my-posh path so the status line command does not depend on PATH
+    OMP_BIN=$(command -v oh-my-posh)
 
     echo -e "${GREEN}✓ All dependencies found${NC}"
     echo ""
@@ -199,22 +199,11 @@ install_files() {
     # Create installation directory
     mkdir -p "$INSTALL_DIR"
 
-    # Copy all files from temp to installation directory
-    cp "$temp_dir/common.sh" "$INSTALL_DIR/"
-    cp "$temp_dir/statusline.sh" "$INSTALL_DIR/"
-    cp "$temp_dir/update-usage.sh" "$INSTALL_DIR/"
-    cp "$temp_dir/fetch-code-usage.sh" "$INSTALL_DIR/"
-    cp "$temp_dir/claude-custom.omp.json" "$INSTALL_DIR/"
+    # Copy theme and VERSION to installation directory
+    cp "$temp_dir/$THEME" "$INSTALL_DIR/"
     cp "$temp_dir/VERSION" "$INSTALL_DIR/"
 
     echo -e "${GREEN}✓ Files copied${NC}"
-
-    # Make scripts executable
-    chmod +x "$INSTALL_DIR/statusline.sh"
-    chmod +x "$INSTALL_DIR/update-usage.sh"
-    chmod +x "$INSTALL_DIR/fetch-code-usage.sh"
-
-    echo -e "${GREEN}✓ Permissions set${NC}"
 }
 
 # Update Claude Code settings.json
@@ -222,15 +211,17 @@ update_settings() {
     echo ""
     echo "Updating settings..."
 
+    local cmd="$OMP_BIN claude --config $INSTALL_DIR/$THEME"
+
     if [ -f "$SETTINGS_FILE" ]; then
         # Backup existing settings
         backup_file="$SETTINGS_FILE.backup.$(date +%Y%m%d_%H%M%S)"
         cp "$SETTINGS_FILE" "$backup_file"
         echo -e "${GREEN}✓ Backed up settings to $(basename "$backup_file")${NC}"
 
-        # Update statusLine.command path using jq
+        # Update statusLine.command using jq
         tmp_file=$(mktemp)
-        jq --arg cmd "bash $INSTALL_DIR/statusline.sh" \
+        jq --arg cmd "$cmd" \
            '.statusLine.command = $cmd | .statusLine.type = "command" | .statusLine.padding = 0' \
            "$SETTINGS_FILE" > "$tmp_file"
 
@@ -243,7 +234,7 @@ update_settings() {
 {
   "statusLine": {
     "type": "command",
-    "command": "bash $INSTALL_DIR/statusline.sh",
+    "command": "$cmd",
     "padding": 0
   }
 }

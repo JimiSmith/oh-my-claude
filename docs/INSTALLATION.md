@@ -90,12 +90,12 @@ Install directly from GitHub without cloning the repository:
 
 1. **Run the web installer**:
    ```bash
-   curl -s https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh | bash
+   curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash
    ```
 
 2. **Custom installation directory** (optional):
    ```bash
-   curl -s https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh | bash -s -- -d ~/.custom/location
+   curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash -s -- -d ~/.custom/location
    ```
 
 3. **The installer will**:
@@ -146,16 +146,16 @@ Install directly from GitHub without cloning the repository:
      1. Restart Claude Code (if running)
      2. Status line will appear automatically
 
-   Documentation: https://github.com/ssenart/oh-my-claude
+   Documentation: https://github.com/JimiSmith/oh-my-claude
    ```
 
-**Security Note**: The installer only writes to your home directory and never requests sudo access. You can review the script before running: [View install.sh](https://github.com/ssenart/oh-my-claude/blob/main/install.sh)
+**Security Note**: The installer only writes to your home directory and never requests sudo access. You can review the script before running: [View install.sh](https://github.com/JimiSmith/oh-my-claude/blob/main/install.sh)
 
 **Troubleshooting**:
 - If download fails: Check your internet connection and retry
 - If you prefer to review the script first:
   ```bash
-  curl -O https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh
+  curl -O https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh
   cat install.sh  # Review the script
   bash install.sh  # Run after review
   ```
@@ -166,7 +166,7 @@ If you prefer to clone the repository or are developing locally:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/ssenart/oh-my-claude.git
+   git clone https://github.com/JimiSmith/oh-my-claude.git
    cd oh-my-claude
    ```
 
@@ -544,7 +544,7 @@ If you encounter issues:
 
 1. Check this troubleshooting guide first
 2. Review [STATUS_LINE_DOCUMENTATION.md](STATUS_LINE_DOCUMENTATION.md)
-3. Open an issue: https://github.com/ssenart/oh-my-claude/issues
+3. Open an issue: https://github.com/JimiSmith/oh-my-claude/issues
 
 ## Platform-Specific Notes
 

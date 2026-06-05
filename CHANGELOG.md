@@ -1,6 +1,27 @@
 # Changelog - Claude Code Custom Status Line
 
-## Version 1.9.2 - Current (2026-05-04)
+## Version 2.0.0 - Current (2026-06-05)
+
+Reworked to render natively via oh-my-posh's [`claude` segment](https://ohmyposh.dev/docs/segments/cli/claude). The status line is now produced directly by `oh-my-posh claude`, which reads Claude Code's session JSON from stdin — removing the wrapper scripts, the OAuth usage fetch, `ccusage`, and the cache.
+
+### Changed
+- **Status line command** is now `oh-my-posh claude --config <dir>/claude-native.omp.json` (was `bash <dir>/statusline.sh`). The installers update `settings.json` accordingly.
+- **Theme**: `src/claude-native.omp.json` replaces `claude-custom.omp.json` / `claude-statusline.omp.json`, using native `claude` segment fields (`.Model.DisplayName`, `.TokenUsagePercent`, `.FiveHourUsage`, `.SevenDayUsage`, `.FiveHourResetsIn`, `.SevenDayResetsAt`). The 5h/7d segments keep the >90% warning colour.
+- **Dependencies** reduced to oh-my-posh (and jq for the installer; git optional).
+
+### Removed
+- `src/statusline.sh`, `src/update-usage.sh`, `src/fetch-code-usage.sh`, `src/fetch-pro-usage.sh`, `src/common.sh` — no longer needed.
+- OAuth credential access and the `ccusage` / `npx` dependency.
+- The `.usage_cache` and background update mechanism.
+- The bats test suite and `run-tests.sh` (the scripts they covered are gone).
+- `docs/OAUTH-CREDENTIALS-GUIDE.md`, `docs/PRO-USAGE-SETUP.md`.
+
+### Notes
+- 5h/7d usage requires a Pro/Max subscription and appears after Claude Code's first API response in a session.
+
+---
+
+## Version 1.9.2 (2026-05-04)
 
 Thanks to [@alexj](https://github.com/alexj) for [PR #1](https://github.com/ssenart/oh-my-claude/pull/1) which contributed the macOS Keychain support and timezone fix in this release.
 

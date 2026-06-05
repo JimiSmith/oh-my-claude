@@ -53,43 +53,43 @@
       "newline": true,
       "segments": [
         {
-          "type": "text",
+          "type": "claude",
           "style": "powerline",
           "foreground": "p:lime",
           "background": "p:teal",
-          "template": " \udb82\udfc9 {{ .Env.CLAUDE_MODEL }} ",
+          "leading_powerline_symbol": "\ue0b6",
           "powerline_symbol": "\ue0b0",
-          "leading_powerline_symbol": "\ue0b6"
+          "template": " \udb82\udfc9 {{ .Model.DisplayName }} "
         },
         {
-          "type": "text",
+          "type": "claude",
           "style": "powerline",
           "foreground": "p:teal",
           "background": "p:lime",
-          "template": "{{ if .Env.CLAUDE_CONTEXT }} \udb80\udf5b ctx {{ .Env.CLAUDE_CONTEXT }} {{ end }}",
-          "powerline_symbol": "\ue0b0"
+          "powerline_symbol": "\ue0b0",
+          "template": "{{ if .ContextWindow.ContextWindowSize }} \udb80\udf5b ctx {{ .TokenUsagePercent }}% {{ end }}"
         },
         {
-          "type": "text",
+          "type": "claude",
           "style": "powerline",
           "foreground": "p:lime",
           "background": "p:teal",
+          "powerline_symbol": "\ue0b0",
           "background_templates": [
-            "{{ if gt (atoi (trimSuffix \"%\" (first (splitList \" \" .Env.CLAUDE_5H)))) 90 }}p:warning{{ end }}"
+            "{{ if gt .FiveHourUsage 90.0 }}p:warning{{ end }}"
           ],
-          "template": "{{ if .Env.CLAUDE_5H }} \udb81\udd1b 5h {{ .Env.CLAUDE_5H }} {{ end }}",
-          "powerline_symbol": "\ue0b0"
+          "template": "{{ if not .FiveHourResetsAt.IsZero }} \udb81\udd1b 5h {{ .FiveHourUsage }}% \u00b7 {{ regexReplaceAll \"m[0-9.]+s$\" (printf \"%v\" .FiveHourResetsIn) \"min\" }} {{ end }}"
         },
         {
-          "type": "text",
+          "type": "claude",
           "style": "powerline",
           "foreground": "p:teal",
           "background": "p:lime",
+          "powerline_symbol": "\ue0b0",
           "background_templates": [
-            "{{ if gt (atoi (trimSuffix \"%\" (first (splitList \" \" .Env.CLAUDE_7D)))) 90 }}p:warning{{ end }}"
+            "{{ if gt .SevenDayUsage 90.0 }}p:warning{{ end }}"
           ],
-          "template": "{{ if .Env.CLAUDE_7D }} \udb81\udcc5 7d {{ .Env.CLAUDE_7D }} {{ end }}",
-          "powerline_symbol": "\ue0b0"
+          "template": "{{ if not .SevenDayResetsAt.IsZero }} \udb81\udcc5 7d {{ .SevenDayUsage }}% \u00b7 {{ .SevenDayResetsAt.Format \"Mon 15:04\" }} {{ end }}"
         }
       ]
     }
