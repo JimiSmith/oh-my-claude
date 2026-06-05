@@ -27,5 +27,5 @@ teardown() {
 }
 
 @test "update-usage.sh creates cache file with valid JSON" {
-    skip "Requires mock scripts for fetch-code-usage.sh and fetch-pro-usage.sh"
+    skip "Requires mock scripts for fetch-code-usage.sh"
 }

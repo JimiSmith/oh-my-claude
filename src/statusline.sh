@@ -47,22 +47,27 @@ if [ -f "$cache_file" ]; then
     cache_age=$(($(date +%s) - $(get_file_mtime "$cache_file")))
     [ "$cache_age" -ge "$cache_timeout" ] && bash "$update_script" &>/dev/null &
 
-    # Read cache once and parse all values
+    # Read cached ccusage session token count
     cache_json=$(cat "$cache_file" 2>/dev/null)
     session_tokens=$(echo "$cache_json" | jq -r '.code.session_tokens // 0')
-    pro_five_hour_usage=$(echo "$cache_json" | jq -r '.pro.five_hour_pct // empty')
-    pro_seven_day_usage=$(echo "$cache_json" | jq -r '.pro.seven_day_pct // empty')
-    pro_five_hour_resets=$(echo "$cache_json" | jq -r '.pro.five_hour_resets_at // empty')
-    pro_seven_day_resets=$(echo "$cache_json" | jq -r '.pro.seven_day_resets_at // empty')
 else
     # No cache, trigger update and use empty data for now
     bash "$update_script" &>/dev/null &
     session_tokens=""
-    pro_five_hour_usage=""
-    pro_seven_day_usage=""
-    pro_five_hour_resets=""
-    pro_seven_day_resets=""
 fi
+
+# 5h / 7d subscription usage comes straight from the status line stdin JSON
+# (.rate_limits), supplied by Claude Code itself - no OAuth token or API call.
+# Note: rate_limits is only present for subscribers after the first API response,
+# so these may be briefly empty at the very start of a session.
+pro_five_hour_usage=$(echo "$input" | jq -r '(.rate_limits.five_hour.used_percentage // .rate_limits.five_hour.utilization) // empty')
+pro_seven_day_usage=$(echo "$input" | jq -r '(.rate_limits.seven_day.used_percentage // .rate_limits.seven_day.utilization) // empty')
+pro_five_hour_resets=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+pro_seven_day_resets=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
+
+# Round percentages to whole numbers for display
+[ -n "$pro_five_hour_usage" ] && pro_five_hour_usage=$(awk -v v="$pro_five_hour_usage" 'BEGIN {printf "%.0f", v}')
+[ -n "$pro_seven_day_usage" ] && pro_seven_day_usage=$(awk -v v="$pro_seven_day_usage" 'BEGIN {printf "%.0f", v}')
 
 # Format Code usage display (tokens only) - using only awk
 code_usage_display=""
@@ -77,42 +82,32 @@ if [ -n "$pro_five_hour_usage" ] && [ -n "$pro_seven_day_usage" ]; then
     pro_usage_display="5h:${pro_five_hour_usage}% 7d:${pro_seven_day_usage}%"
 fi
 
-# Format reset times display
+# Format reset times display (resets_at are Unix epoch seconds)
 reset_display=""
-if [ -n "$pro_five_hour_resets" ] && [ -n "$pro_seven_day_resets" ]; then
-    # Parse reset time (remove milliseconds and normalize timezone for macOS compatibility)
-    five_hour_clean=$(echo "$pro_five_hour_resets" | sed 's/\.[0-9]*+/+/' | sed 's/+\([0-9][0-9]\):\([0-9][0-9]\)$/+\1\2/')
-    seven_day_clean=$(echo "$pro_seven_day_resets" | sed 's/\.[0-9]*+/+/' | sed 's/+\([0-9][0-9]\):\([0-9][0-9]\)$/+\1\2/')
+five_hour_display=""
+seven_day_display=""
+now_sec=$(date +%s)
 
-    # Get current time and reset time in seconds since epoch
-    now_sec=$(date +%s)
-    five_hour_sec=$(parse_date "$five_hour_clean")
-
-    if [ -n "$five_hour_sec" ]; then
-        # Calculate difference
-        diff_sec=$((five_hour_sec - now_sec))
-
-        if [ "$diff_sec" -gt 0 ]; then
-            hours=$((diff_sec / 3600))
-            mins=$(((diff_sec % 3600) / 60))
-            five_hour_display="${hours}h${mins}min"
-        else
-            five_hour_display="resetting..."
-        fi
+# 5h reset: time remaining until the window resets
+if [[ "$pro_five_hour_resets" =~ ^[0-9]+$ ]]; then
+    diff_sec=$((pro_five_hour_resets - now_sec))
+    if [ "$diff_sec" -gt 0 ]; then
+        hours=$((diff_sec / 3600))
+        mins=$(((diff_sec % 3600) / 60))
+        five_hour_display="${hours}h${mins}min"
     else
-        five_hour_display="?"
+        five_hour_display="resetting..."
     fi
+fi
 
-    # Format 7-day reset time (day + time)
-    seven_day_day=$(format_date "+%a" "$seven_day_clean")
-    seven_day_time=$(format_date "+%H:%M" "$seven_day_clean")
+# 7d reset: day + time (date -d @epoch on GNU, date -r epoch on BSD/macOS)
+if [[ "$pro_seven_day_resets" =~ ^[0-9]+$ ]]; then
+    seven_day_day=$(date -d "@$pro_seven_day_resets" "+%a" 2>/dev/null || date -r "$pro_seven_day_resets" "+%a" 2>/dev/null)
+    seven_day_time=$(date -d "@$pro_seven_day_resets" "+%H:%M" 2>/dev/null || date -r "$pro_seven_day_resets" "+%H:%M" 2>/dev/null)
+    [ -n "$seven_day_day" ] && [ -n "$seven_day_time" ] && seven_day_display="${seven_day_day}${seven_day_time}"
+fi
 
-    if [ -n "$seven_day_day" ] && [ -n "$seven_day_time" ]; then
-        seven_day_display="${seven_day_day}${seven_day_time}"
-    else
-        seven_day_display="?"
-    fi
-
+if [ -n "$five_hour_display" ] && [ -n "$seven_day_display" ]; then
     reset_display="5h:${five_hour_display} 7d:${seven_day_display}"
 fi
 

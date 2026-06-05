@@ -1,7 +1,7 @@
 #!/bin/bash
 # Local installation script for oh-my-claude status line
 # This script is for local development - run after cloning the repository
-# For web-based installation, use: curl -s https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh | bash
+# For web-based installation, use: curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash
 # Installs to ~/.claude/oh-my-claude/ and updates Claude Code settings
 
 set -e
@@ -71,7 +71,6 @@ cp "$SCRIPT_DIR/src/common.sh" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/src/statusline.sh" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/src/update-usage.sh" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/src/fetch-code-usage.sh" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/src/fetch-pro-usage.sh" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/src/claude-statusline.omp.json" "$INSTALL_DIR/"
 cp "$SCRIPT_DIR/VERSION" "$INSTALL_DIR/"
 
@@ -83,7 +82,6 @@ echo "Making scripts executable..."
 chmod +x "$INSTALL_DIR/statusline.sh"
 chmod +x "$INSTALL_DIR/update-usage.sh"
 chmod +x "$INSTALL_DIR/fetch-code-usage.sh"
-chmod +x "$INSTALL_DIR/fetch-pro-usage.sh"
 
 echo -e "${GREEN}✓ Scripts are now executable${NC}"
 echo ""

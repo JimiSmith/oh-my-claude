@@ -1,13 +1,13 @@
 #!/bin/bash
 # Web installer for oh-my-claude status line
 # Downloads latest version from GitHub and installs to ~/.claude/oh-my-claude
-# Usage: curl -s https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh | bash
+# Usage: curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash
 # Custom directory: curl -s ... | bash -s -- -d ~/.custom/location
 
 set -e  # Exit on error
 
 # Constants
-GITHUB_REPO="ssenart/oh-my-claude"
+GITHUB_REPO="JimiSmith/oh-my-claude"
 BRANCH="main"
 DEFAULT_INSTALL_DIR="$HOME/.claude/oh-my-claude"
 SETTINGS_FILE="$HOME/.claude/settings.json"
@@ -36,7 +36,7 @@ show_help() {
     echo "oh-my-claude Web Installer"
     echo ""
     echo "Usage:"
-    echo "  curl -s https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh | bash"
+    echo "  curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash"
     echo ""
     echo "Options:"
     echo "  -d, --dir DIR     Install to custom directory (default: ~/.claude/oh-my-claude)"
@@ -44,12 +44,12 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  # Default installation"
-    echo "  curl -s https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh | bash"
+    echo "  curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash"
     echo ""
     echo "  # Custom directory"
-    echo "  curl -s https://raw.githubusercontent.com/ssenart/oh-my-claude/main/install.sh | bash -s -- -d ~/.custom/location"
+    echo "  curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash -s -- -d ~/.custom/location"
     echo ""
-    echo "Documentation: https://github.com/ssenart/oh-my-claude"
+    echo "Documentation: https://github.com/JimiSmith/oh-my-claude"
 }
 
 # Parse command-line arguments
@@ -111,7 +111,6 @@ download_all_files() {
     download_file "$base_url/src/statusline.sh" "$temp_dir/statusline.sh" || failed=1
     download_file "$base_url/src/update-usage.sh" "$temp_dir/update-usage.sh" || failed=1
     download_file "$base_url/src/fetch-code-usage.sh" "$temp_dir/fetch-code-usage.sh" || failed=1
-    download_file "$base_url/src/fetch-pro-usage.sh" "$temp_dir/fetch-pro-usage.sh" || failed=1
     download_file "$base_url/src/claude-statusline.omp.json" "$temp_dir/claude-statusline.omp.json" || failed=1
     download_file "$base_url/VERSION" "$temp_dir/VERSION" || failed=1
 
@@ -130,7 +129,7 @@ download_all_files() {
 
 # Verify all downloads completed successfully
 verify_downloads() {
-    local required_files=("common.sh" "statusline.sh" "update-usage.sh" "fetch-code-usage.sh" "fetch-pro-usage.sh" "claude-statusline.omp.json" "VERSION")
+    local required_files=("common.sh" "statusline.sh" "update-usage.sh" "fetch-code-usage.sh" "claude-statusline.omp.json" "VERSION")
 
     for file in "${required_files[@]}"; do
         if [ ! -f "$temp_dir/$file" ] || [ ! -s "$temp_dir/$file" ]; then
@@ -205,7 +204,6 @@ install_files() {
     cp "$temp_dir/statusline.sh" "$INSTALL_DIR/"
     cp "$temp_dir/update-usage.sh" "$INSTALL_DIR/"
     cp "$temp_dir/fetch-code-usage.sh" "$INSTALL_DIR/"
-    cp "$temp_dir/fetch-pro-usage.sh" "$INSTALL_DIR/"
     cp "$temp_dir/claude-statusline.omp.json" "$INSTALL_DIR/"
     cp "$temp_dir/VERSION" "$INSTALL_DIR/"
 
@@ -215,7 +213,6 @@ install_files() {
     chmod +x "$INSTALL_DIR/statusline.sh"
     chmod +x "$INSTALL_DIR/update-usage.sh"
     chmod +x "$INSTALL_DIR/fetch-code-usage.sh"
-    chmod +x "$INSTALL_DIR/fetch-pro-usage.sh"
 
     echo -e "${GREEN}✓ Permissions set${NC}"
 }
