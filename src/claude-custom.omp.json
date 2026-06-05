@@ -54,12 +54,12 @@
       "segments": [
         {
           "type": "text",
-          "style": "diamond",
+          "style": "powerline",
           "foreground": "p:lime",
           "background": "p:teal",
           "template": " \udb82\udfc9 {{ .Env.CLAUDE_MODEL }} ",
-          "leading_diamond": "\ue0b6",
-          "trailing_diamond": ""
+          "powerline_symbol": "\ue0b0",
+          "leading_powerline_symbol": "\ue0b6"
         },
         {
           "type": "text",
