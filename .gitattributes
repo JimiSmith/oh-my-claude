@@ -7,6 +7,9 @@
 # Shell scripts must use LF (critical for Linux/macOS execution)
 *.sh text eol=lf
 
+# PowerShell scripts use CRLF (Windows convention; PowerShell reads either)
+*.ps1 text eol=crlf
+
 # Configuration and data files
 *.json text eol=lf
 *.md text eol=lf
@@ -20,10 +23,12 @@ README.md text eol=lf
 LICENSE text eol=lf
 VERSION text eol=lf
 
-# Installer scripts (no extension)
+# Installer scripts
 install.sh text eol=lf
 local-install.sh text eol=lf
 bump-version.sh text eol=lf
+install.ps1 text eol=crlf
+local-install.ps1 text eol=crlf
 
 # Images (binary files)
 *.png binary

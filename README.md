@@ -21,32 +21,50 @@ There is **no wrapper script, no `ccusage`, no token handling, and no cache** �
 
 ### Quick Install (Recommended)
 
-Install directly from GitHub without cloning:
+Install directly from GitHub without cloning.
 
+**macOS / Linux (bash):**
 ```bash
 curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash
 ```
 
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.ps1 | iex
+```
+
 **Custom installation directory:**
 ```bash
+# bash
 curl -s https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.sh | bash -s -- -d ~/.custom/location
+```
+```powershell
+# PowerShell — use the script-block form so the -Dir argument binds
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/JimiSmith/oh-my-claude/main/install.ps1))) -Dir "$HOME\.custom\location"
 ```
 
 This will:
-- ✅ Check for required dependencies (oh-my-posh, jq; git optional)
+- ✅ Check for required dependencies (oh-my-posh; `jq` for the bash installer only; git optional)
 - ✅ Install the theme to `~/.claude/oh-my-claude/`
 - ✅ Back up and update your `~/.claude/settings.json` to run `oh-my-posh claude`
 
-**Security Note**: The installer only writes to your home directory and never requests sudo access. You can review the script before running: [View install.sh](https://github.com/JimiSmith/oh-my-claude/blob/main/install.sh)
+**Security Note**: The installer only writes to your home directory and never requests sudo/admin access. You can review the script before running: [View install.sh](https://github.com/JimiSmith/oh-my-claude/blob/main/install.sh) · [View install.ps1](https://github.com/JimiSmith/oh-my-claude/blob/main/install.ps1)
 
 ### Alternative: Local Installation
 
 For development or if you prefer to clone the repository:
 
 ```bash
+# macOS / Linux
 git clone https://github.com/JimiSmith/oh-my-claude.git
 cd oh-my-claude
 bash local-install.sh
+```
+```powershell
+# Windows (PowerShell)
+git clone https://github.com/JimiSmith/oh-my-claude.git
+cd oh-my-claude
+.\local-install.ps1
 ```
 
 ### Manual setup
@@ -91,10 +109,12 @@ The 5h/7d segments only appear for Pro/Max subscribers once Claude Code has the 
 
 ```
 oh-my-claude/
-├── install.sh                    # Web installer (downloads from GitHub)
-├── local-install.sh              # Local installer (for development)
+├── install.sh                    # Web installer, bash (downloads from GitHub)
+├── install.ps1                   # Web installer, PowerShell (Windows)
+├── local-install.sh              # Local installer, bash (for development)
+├── local-install.ps1             # Local installer, PowerShell (Windows)
 ├── bump-version.sh               # Version bump helper
-├── .gitattributes                # Force LF line endings (cross-platform)
+├── .gitattributes                # Line-ending normalization (cross-platform)
 ├── src/
 │   └── claude-native.omp.json    # The oh-my-posh theme (the whole status line)
 ├── README.md                     # This file
@@ -130,7 +150,7 @@ Everything lives in `~/.claude/oh-my-claude/claude-native.omp.json`:
 ## Dependencies
 
 - **oh-my-posh** (required) — renders the status line
-- **jq** (required by the installer) — used to update `settings.json`
+- **jq** (required by the *bash* installer only) — used to update `settings.json`; the PowerShell installer uses built-in JSON cmdlets and needs no `jq`
 - **git** (optional) — only needed for the git segment
 - A **Nerd Font** in your terminal for the icons
 
@@ -138,8 +158,14 @@ Everything lives in `~/.claude/oh-my-claude/claude-native.omp.json`:
 
 **Test the status line manually:**
 ```bash
+# macOS / Linux
 echo '{"model":{"display_name":"Test"},"context_window":{"current_usage":{"input_tokens":1000},"context_window_size":200000}}' \
   | oh-my-posh claude --config ~/.claude/oh-my-claude/claude-native.omp.json
+```
+```powershell
+# Windows (PowerShell)
+'{"model":{"display_name":"Test"},"context_window":{"current_usage":{"input_tokens":1000},"context_window_size":200000}}' |
+  oh-my-posh claude --config "$HOME\.claude\oh-my-claude\claude-native.omp.json"
 ```
 
 **Status line not appearing?** Check `~/.claude/settings.json` contains:
